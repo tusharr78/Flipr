@@ -7,6 +7,8 @@ const ejs = require('ejs');
 
 const app = express();
 
+const arr = [];
+
 app.set('view engine', 'ejs');
 
 app.use(bodyParser.urlencoded({
@@ -40,19 +42,34 @@ app.post("/:params" , function(req, res){
     //   console.log( post );
     // });
     
-    Device.find(function(e, post){
+    // Device.find(function(e, post){
+
       // post.forEach(x => {
       //   Status.find({device: x.id}, (err, doc) => {
       //     console.log(doc);
       //   })
       // });
+
+
+    //   post.forEach(x => {
+    //     console.log(post[0].client);
+    //     Status.find({device: x.id}, function(err, doc){
+    //         for(var i = 0; i < 3; i++){
+    //           console.log(doc[i].input);
+    //         }
+    //     }).sort({ _id: -1 }).limit(3)
+    //   })
+    // }).sort({ _id: -1 }).limit(1)
+    
+    Device.find(function(err, post){
       post.forEach(x => {
         Status.find({device: x.id}, function(err, doc){
-             console.log(doc);
-        }).sort({ _id: -1 }).limit(3)
+            doc.forEach(y => {
+              console.log(y.gps);
+            })
+        }).lean().sort({ _id: -1}).limit(3);
       })
-    }).sort({ _id: -1 }).limit(1)
-    
+    }).lean().sort({ _id: -1 }).limit(1);
 
 });
 
