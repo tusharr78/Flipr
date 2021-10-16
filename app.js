@@ -7,7 +7,9 @@ const ejs = require('ejs');
 
 const app = express();
 
-const arr = [];
+
+
+var obj = {};
 
 app.set('view engine', 'ejs');
 
@@ -17,17 +19,13 @@ app.use(bodyParser.urlencoded({
 
 app.use(express.static("public"));
 
-// const deviceSchema = new mongoose.Schema({
-//     deviceID: String
-// }) 
-// const Device = mongoose.model("device", deviceSchema);
 
-// const statusSchema = new mongoose.Schema({
-    
-// })
-// const Status = mongoose.model("status", statusSchema);
 
 app.post("/:params" , function(req, res){
+    
+    // mongo url in body
+    // status to be passed as query
+    
     console.log(req.body.url);
     mongoose.connect(req.body.url);
     
@@ -38,40 +36,24 @@ app.post("/:params" , function(req, res){
     var Device = mongoose.model("Device", new deviceSchema({}), "devices");  
     var Status = mongoose.model("Status", new statusSchema({}), "status");
     
-    // Device.findOne({}, {}, { sort: { 'created_at' : -1 } }, function(err, post) {
-    //   console.log( post );
-    // });
     
-    // Device.find(function(e, post){
-
-      // post.forEach(x => {
-      //   Status.find({device: x.id}, (err, doc) => {
-      //     console.log(doc);
-      //   })
-      // });
-
-
-    //   post.forEach(x => {
-    //     console.log(post[0].client);
-    //     Status.find({device: x.id}, function(err, doc){
-    //         for(var i = 0; i < 3; i++){
-    //           console.log(doc[i].input);
-    //         }
-    //     }).sort({ _id: -1 }).limit(3)
-    //   })
-    // }).sort({ _id: -1 }).limit(1)
     
-    Device.find(function(err, post){
-      post.forEach(x => {
-        Status.find({device: x.id}, function(err, doc){
-            doc.forEach(y => {
-              console.log(y.gps);
+    Device.find(function(err, posts){
+      posts.forEach(post => {
+        obj[post.id] = [];
+        Status.find({device: post.id}, function(err, docs){
+            docs.forEach(doc => {
+              obj[post.id].push(doc.gps);
             })
-        }).lean().sort({ _id: -1}).limit(3);
+            console.log(obj);
+        }).lean().sort({ _id: -1}).limit(50);
       })
-    }).lean().sort({ _id: -1 }).limit(1);
-
+    }).lean().sort({ _id: -1 }).limit(30);
 });
+
+
+
+
 
 
 
