@@ -3,22 +3,61 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 require('dotenv/config');
 const ejs = require('ejs');
+const https = require('https');
+const axios = require('axios').default;
 
 const app = express();
-
-// object to sent
-var obj = {};
 
 app.set('views', 'ejs');
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+app.use(
+  bodyParser.json({
+    type: "json"
+  })
+);
 
-app.get("/", function(req, res){
-  res.send("<h1>Please enter parameter and query</h1>")
+
+// TASK 2
+// GEOCODE
+app.route("/")
+.get(function(req, res){
+  res.write("<h1>Task 2 - Geocode</h1>")
+  res.write("<h2>Make a post request with a JSON array</h2>")
+  res.write("<h2>For Task 1, enter valid param and query</h2>")
 })
+.post(function(req, res){
 
-app.get("/:params", function(req, res){
+  // array to be returned
+  const arr = [];
+   
+  // accessing the address array recieved in the body
+  const address = req.body;
+ 
+  //looping through the array to find corresponding geocode
+  address.forEach(ad => {
+  const url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + ad + "&key=" + process.env.API_KEY;
+  axios.get(url)
+  .then((response) => {
+      arr.push({
+          add: [ad],
+          location: [response.data.results[0].geometry.location]
+      })
+  })
+  // Sending the resultant array
+  .then(() => res.send(arr));
+ });
+});
+
+
+
+
+
+// TASK 1 
+// GETTING DEVICES AND STATUS
+app.route("/:params")
+.get(function(req, res){
   if((req.params.params === "devices") && (req.query.query === "status")){
     res.write("<h1>Task 1</h1>");
     res.write("<h3>Please make a post request</h3>");
@@ -28,16 +67,17 @@ app.get("/:params", function(req, res){
     res.send("Please enter correct parameter and query");
   }
 })
+.post(function(req, res){
 
-app.post("/:params" , function(req, res, next){
-    
     // mongo url in body
     // status to be passed as query
-    console.log(req.params);
-    console.log(req.query);
 
     // checking if the user entered correct params and query
   if((req.params.params === "devices") && (req.query.query === "status")){
+
+    // object to be sent
+    var obj = {};
+    
 
     // connecting to the mongo server
     mongoose.connect(req.body.url);
@@ -75,7 +115,8 @@ app.post("/:params" , function(req, res, next){
       res.send("Invalid parameter or query");
     }
   }
-)
+);
+
   
         
 app.listen(3000, function(){
