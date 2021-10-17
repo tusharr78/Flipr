@@ -1,17 +1,16 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 require('dotenv/config');
 const ejs = require('ejs');
 const https = require('https');
 const axios = require('axios').default;
-const { stringify } = require('querystring');
-
 
 const app = express();
+
+// array to be returned
 const arr = [];
 
-app.set('view engine', 'ejs');
+app.set('views', 'ejs');
 app.use(
     bodyParser.json({
       type: "json"
@@ -19,14 +18,23 @@ app.use(
   );
 app.use(express.static("public"));
 
+app.get("/", function(req, res){
+   res.redirect("/geocode")
+})
 
+app.get("/geocode", function(req, res){
+      res.write("<h1>Task 2</h1>");
+      res.write("<h3>Please make a post request</h3>");
+      res.end();
+  })
 
-// const url = "https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway,+Mountain+View,+CA&key=" + process.env.API_KEY;
-
+// having /geocode as an endpoint
 app.post("/geocode", function(req, res){
-    
-   let address = req.body;
-
+   
+    // accessing the address array recieved in the body
+   const address = req.body;
+   
+   //looping through the array to find corresponding geocode
    address.forEach(ad => {
     const url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + ad + "&key=" + process.env.API_KEY;
     axios.get(url)
@@ -36,9 +44,9 @@ app.post("/geocode", function(req, res){
             location: [response.data.results[0].geometry.location]
         })
     })
-    .then(() => console.log(arr[0]));
+    // Sending the resultant array
+    .then(() => res.send(arr));
    });
-    
 })
 
 
